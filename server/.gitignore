@@ -102,6 +102,3 @@ Desktop.ini
 
 # Jetbrains stuff
 **/.idea/
-
-# Python virtual environment
-**/venv/
