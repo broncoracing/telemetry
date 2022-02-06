@@ -1,0 +1,37 @@
+{
+  "src/lib/components/DashWebsocket.react.js": {
+    "description": "DashWebsocket is an adapter for websocket.\nIt takes two property, `url` and 'msg'\n`url` indicates the websocket url\n`msg` display the message returns from webscoket",
+    "displayName": "DashWebsocket",
+    "methods": [],
+    "props": {
+      "id": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The ID used to identify this component in Dash callbacks."
+      },
+      "msg": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The websocket response message."
+      },
+      "url": {
+        "type": {
+          "name": "string"
+        },
+        "required": true,
+        "description": "The url for websocket."
+      },
+      "setProps": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "Dash-assigned callback that should be called to report property changes\nto Dash, to make them available for callbacks."
+      }
+    }
+  }
+}

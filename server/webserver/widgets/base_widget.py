@@ -1,7 +1,7 @@
 import dash
 
 import dash_bootstrap_components as dbc
-from dash import dcc
+from dash import dcc, Dash
 import dash_daq as daq
 from dash import Input, Output, html, State, ALL
 from dash.exceptions import PreventUpdate
@@ -19,7 +19,7 @@ class BaseWidget:
         random_id = str(uuid.uuid4())
         # Create an ID which contains a type and index. The type is used so that a callback below can be applied to a type of widget
         # instead of each widget individually.
-        self.widget_id = {'index': random_id, 'type': "Graph"}
+        self.widget_id = {'index': random_id, 'type': self.widget_type}
         # Create the widget and wrap it in a <span>. The id of the span is just the random uuid with no type.
         self.widget = html.Span(self.create_widget(), id=random_id)
 
@@ -29,5 +29,5 @@ class BaseWidget:
 
     # Create necessary callbacks in the app. This is a static method because it only needs to be run once for all widgets of a given type.
     @staticmethod
-    def create_callback(app):
+    def create_callback(app: Dash):
         pass
