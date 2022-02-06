@@ -1,0 +1,40 @@
+.btn-close {
+    display: none;
+}
+
+.btn-settings {
+    display: none;
+}
+
+.hover-row {
+    position: fixed;
+    height: 30px;
+    width: 100%;
+}
+
+.hover-row:hover > .btn-close {
+    display: inline-block;
+    z-index: 9;
+    margin-left: 20px;
+    margin-top: 0px;
+    position: fixed;
+}
+
+.hover-row:hover > .btn-settings {
+    display: inline-block;
+    z-index: 9;
+    margin-left: 50px;
+    margin-top: 0px;
+    position: fixed;
+    background: transparent url("gear.svg") center/1em auto no-repeat;
+}
+
+.item-content {
+    overflow: hidden;
+    overflow-y: hidden; /* Hide vertical scrollbar */
+}
+
+.js-plotly-plot {
+    position: relative;
+    z-index: -1;
+}

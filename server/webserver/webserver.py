@@ -7,7 +7,7 @@ import dash_websocket
 import dash_draggable
 
 from .widgets import create_widget_callbacks
-from .create_widget_dropdown import create_dropdown_callback, dropdown
+from .widget_callbacks import create_widget_management_callbacks, dropdown
 
 
 class Webserver:
@@ -17,37 +17,56 @@ class Webserver:
 
         # Initialize app
         # prevent_initial_callbacks=True prevents the update callbacks from being called on creation
-        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], prevent_initial_callbacks=True, update_title=None)
+        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI], prevent_initial_callbacks=True, update_title=None)
         self.app.title = 'Bronco Racing Telemetry'
         # Create the app layout
-        self.app.layout = dbc.Container([
-            # Interval component periodically triggers callbacks. TODO: Make this use websockets instead
-            dcc.Interval(
-                id='interval-component',
-                interval=1000,  # in milliseconds
-                n_intervals=0
+        self.app.layout = html.Div([
+            # Stores data of the raw telemetry data. This will be updated via websockets.
+            dcc.Store(id='telemetry_data'),
+            # Stores the data column headers but not the data itself. This is used to update dropdowns/settings.
+            dcc.Store(id='telemetry_data_columns'),
+
+            # Navbar on top holds logo/heading, and buttons/links to add stuff or save/load.
+            dbc.Navbar(
+                dbc.Container(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Col(html.Img(src=self.app.get_asset_url('logo.png'), height="30px")),
+                                dbc.Col(dbc.NavbarBrand("Telemetry Dashboard", className="ms-2")),
+                            ],
+                            align="center",
+                            className="g-0",
+                        ),
+                        dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
+                        dbc.Collapse(
+                            dropdown,
+                            id="navbar-collapse",
+                            is_open=False,
+                            navbar=True,
+                        ),
+                    ]
+                ),
+                color="dark",
+                dark=True,
             ),
 
             dash_websocket.DashWebsocket(id='ws', url='ws://127.0.0.1:5678'),  # woohoo custom component!
 
-            # Stores json data of the raw telemetry data. This will be updated via websockets.
-            dcc.Store(id='telemetry_data'),
 
 
-            html.H1("Telemetry Dashboard"),
-            html.Div(id="test"),
-            dropdown,
             # Grid layout contains all of the resizable/movable components.
-            dash_draggable.GridLayout(
+            dash_draggable.ResponsiveGridLayout(
                 id='draggable',
                 clearSavedLayout=True,
-                children=[]
+                children=[],
+                gridCols={'lg': 21, 'md': 17, 'sm': 14, 'xs': 7, 'xxs': 5}
             ),
 
         ])
 
         # Create the necessary callbacks
-        create_dropdown_callback(self.app)
+        create_widget_management_callbacks(self.app)
         create_widget_callbacks(self.app)
 
         self.app.clientside_callback(
@@ -55,9 +74,11 @@ class Webserver:
                 namespace='clientside',
                 function_name='update_data_from_websockets'
             ),
-            Output("telemetry_data", "data"),
-            Input('ws', 'msg'),
-            State("telemetry_data", "data")
+            [Output("telemetry_data", "data"),
+             Output("telemetry_data_columns", "data")],
+            [Input('ws', 'msg')],
+            [State("telemetry_data", "data"),
+             State("telemetry_data_columns", "data")]
         )
 
     def run(self):
