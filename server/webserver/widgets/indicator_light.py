@@ -24,25 +24,29 @@ class IndicatorLight(BaseWidget):
     def create_settings_menu(self):
         return self._source_settings_menu()
 
-    @staticmethod
-    def create_callback(app):
+    @classmethod
+    def create_callback(cls, app):
         # Data update callback
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
                 function_name='update_indicator'
             ),
-            Output({'type': "Indicator", 'index': ALL}, 'value'),
+            Output({'type': "Indicator", 'index': MATCH}, 'value'),
             Input('telemetry_data', 'data'),
-            State({'type': "Indicator", 'index': ALL}, 'label'),
+            State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
         )
 
         # Data source changed
         @app.callback(
-            Output({'type': IndicatorLight.widget_type, 'index': MATCH}, 'label'),
-            Input({'type': 'value_dropdown', 'index': MATCH}, 'value')
+            [Output({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
+             Output({'type': "Indicator", 'index': MATCH}, 'label')],
+            Input({'type': 'value_dropdown', 'index': MATCH}, 'value'),
+            State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
         )
-        def select_data_source(val):
+        def select_data_source(val, data):
             if val is None:
-                return 'No source'
-            return val
+                val = 'No source'
+
+            data['value'] = val
+            return [data, val]

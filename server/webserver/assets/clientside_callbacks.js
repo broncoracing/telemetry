@@ -64,7 +64,20 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             return [current_data, columns];
         },
 
-        update_graph_from_data: function(data, title, axes, persistence, max_points, line_style, fig) {
+        update_graph_from_data: function(data, settings, fig){// title, axes, persistence, max_points, line_style, ) {
+            var title = '';
+            var axes = undefined;
+            var persistence = 30;
+            var max_points = 2000;
+            var line_style = 'line';
+            // Ensure the settings are set up properly
+            if(['title', 'axes', 'persistence', 'max_points', 'line_style'].every(attr => settings.hasOwnProperty(attr))){
+                title = settings.title;
+                axes = settings.axes;
+                persistence = settings.persistence;
+                max_points = settings.max_points;
+                line_style = settings.line_style;
+            }
 
             let fig_layout = {
                 title:title,
@@ -164,35 +177,34 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             return output;
         },
 
-        update_thermometer_widget: function(data, maxs, mins, labels) {
-            output_val = new Array();
-            output_max = new Array();
-            output_min = new Array();
-            for(var i = 0; i < labels.length; i++){
-                let data_column_idx = data.columns.findIndex(el => el === labels[i]);
-                if(data_column_idx < 0){
-                    output_val.push(0);
-                    output_max.push(maxs[i]);
-                    output_min.push(mins[i]);
-                }
-                let value = data.data[data.data.length-1][data_column_idx];
-                let new_max = Math.max(maxs[i], value);
-                let new_min = Math.min(mins[i], value)
-                output_val.push(value);
-                output_max.push(new_max)
-                output_min.push(new_min);
+        update_thermometer_widget: function(data, settings) {
+            // Ensure the settings are set up properly
+            if(!['value', 'min', 'max'].every(attr => settings.hasOwnProperty(attr))){
+                return [0, 10, 0, 'No data'];
             }
-            return [output_val, output_max, output_min];
+
+            let label = settings.value;
+            let data_column_idx = data.columns.findIndex(el => el === label);
+            if(data_column_idx < 0){
+                return [0, settings.max, settings.min, 'No data'];
+            }
+
+            let value = data.data[data.data.length-1][data_column_idx];
+            let new_max = Math.max(settings.max, value);
+            let new_min = Math.min(settings.min, value);
+
+            return [value, new_max, new_min, settings.value];
         },
-        update_indicator: function(data, labels) {
-//            console.log(labels);
-            return labels.map(function(l){
-                let data_column_idx = data.columns.findIndex(el => el === l);
-                if(data_column_idx < 0){
-                    return 0;
-                }
-                return data.data[data.data.length-1][data_column_idx] > 0;
-            });
+        update_indicator: function(data, settings) {
+
+            if(!settings.hasOwnProperty('value')){
+                return false;
+            }
+            let data_column_idx = data.columns.findIndex(el => el === settings.value);
+            if(data_column_idx < 0){
+                return 0;
+            }
+            return data.data[data.data.length-1][data_column_idx] > 0;
         },
     }
 });

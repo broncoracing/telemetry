@@ -41,28 +41,42 @@ class Gauge(BaseWidget):
             ])
         ]
 
-    @staticmethod
-    def create_callback(app):
+    @classmethod
+    def create_callback(cls, app):
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
                 function_name='update_thermometer_widget'
             ),
-            [Output({'type': "Gauge", 'index': ALL}, 'value'),
-             Output({'type': "Gauge", 'index': ALL}, 'max'),
-             Output({'type': "Gauge", 'index': ALL}, 'min')],
+            [Output({'type': "Gauge", 'index': MATCH}, 'value'),
+             Output({'type': "Gauge", 'index': MATCH}, 'max'),
+             Output({'type': "Gauge", 'index': MATCH}, 'min'),
+             Output({'type': "Gauge", 'index': MATCH}, 'label')
+             ],
             [Input('telemetry_data', 'data'),
-             Input({'type': "gauge_max_value", 'index': ALL}, 'value'),
-             Input({'type': "gauge_min_value", 'index': ALL}, 'value')],
-            [State({'type': "Gauge", 'index': ALL}, 'label')]
+             Input({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')],
         )
 
         # Data source changed
         @app.callback(
-            Output({'type': Gauge.widget_type, 'index': MATCH}, 'label'),
-            Input({'type': 'value_dropdown', 'index': MATCH}, 'value')
+            [Output({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')],
+            [Input({'type': 'value_dropdown', 'index': MATCH}, 'value'),
+             Input({'type': 'gauge_min_value', 'index': MATCH}, 'value'),
+             Input({'type': 'gauge_max_value', 'index': MATCH}, 'value')],
+            [State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')]
         )
-        def select_data_source(val):
-            if val is None:
-                return 'No source'
-            return val
+        def update_settings(value, scale_min, scale_max, data):
+            print(data)
+
+            if value is None:
+                value = 'No source'
+            if scale_min is None:
+                scale_min = 0
+            if scale_max is None:
+                scale_max = 10
+
+            data['value'] = value
+            data['min'] = scale_min
+            data['max'] = scale_max
+
+            return [data]

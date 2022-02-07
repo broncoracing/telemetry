@@ -68,8 +68,8 @@ class Graph(BaseWidget):
                 ]
             )]
 
-    @staticmethod
-    def create_callback(app):
+    @classmethod
+    def create_callback(cls, app):
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
@@ -77,10 +77,36 @@ class Graph(BaseWidget):
             ),
             Output({'type': "Graph", 'index': MATCH}, 'figure'),
             [Input('telemetry_data', 'data'),
-             Input({'type': "graph_title_input", 'index': MATCH}, 'value'),
+             Input({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')],
+            State({'type': "Graph", 'index': MATCH}, 'figure')
+        )
+
+
+        @app.callback(
+            Output({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
+            [Input({'type': "graph_title_input", 'index': MATCH}, 'value'),
              Input({'type': "graph_axis_dropdown", 'index': MATCH}, 'value'),
              Input({'type': "graph_persistence", 'index': MATCH}, 'value'),
              Input({'type': "graph_max_points", 'index': MATCH}, 'value'),
              Input({'type': "graph_line_style", 'index': MATCH}, 'value')],
-            State({'type': "Graph", 'index': MATCH}, 'figure')
+            State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
         )
+        def update_settings(title, axes, persistence, max_points, line_style, data):
+            if title is None:
+                title = ''
+            if axes is None:
+                axes = []
+            if persistence is None:
+                persistence = 30
+            if max_points is None:
+                max_points = 2000
+            if line_style is None:
+                line_style = 'lines'
+
+            data['title'] = title
+            data['axes'] = axes
+            data['persistence'] = persistence
+            data['max_points'] = max_points
+            data['line_style'] = line_style
+
+            return data

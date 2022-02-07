@@ -22,8 +22,8 @@ class NumberDisplay(BaseWidget):
     def create_settings_menu(self):
         return self._source_settings_menu()
 
-    @staticmethod
-    def create_callback(app):
+    @classmethod
+    def create_callback(cls, app):
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
@@ -37,10 +37,24 @@ class NumberDisplay(BaseWidget):
 
         # Data source changed
         @app.callback(
-            Output({'type': NumberDisplay.widget_type, 'index': MATCH}, 'label'),
-            Input({'type': 'value_dropdown', 'index': MATCH}, 'value')
+            Output({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
+            Input({'type': 'value_dropdown', 'index': MATCH}, 'value'),
+            State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
         )
-        def select_data_source(val):
+        def select_data_source(val, data):
             if val is None:
-                return 'No source'
-            return val
+                val = 'No source'
+            data['value'] = val
+            return data
+
+        @app.callback(
+            Output({'type': "NumberDisplay", 'index': MATCH}, 'label'),
+            Input({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
+        )
+        def set_label(data):
+            if data is None:
+                return 'No data'
+            elif 'value' in data.keys():
+                return data['value']
+            else:
+                return 'No data'

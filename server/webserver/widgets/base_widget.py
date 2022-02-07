@@ -14,9 +14,15 @@ class BaseWidget:
     widget_name = "Default name, please override"
     widget_type = "DefaultType"
 
-    def __init__(self):
-        # Generate a random ID for the widget, this is so that it can be uniquely identified even if there are multiple on the page.
-        self.random_id = str(uuid.uuid4())
+    def __init__(self, saved_data=None):
+
+        if saved_data is not None:
+            # If there's already save data, take the id from that.
+            self.random_id = saved_data['id']['index']
+        else:
+            # Generate a random ID for the widget, this is so that it can be uniquely identified even if there are multiple on the page.
+            self.random_id = str(uuid.uuid4())
+
         # Create an ID which contains a type and index. The type is used so that a callback below can be applied to a type of widget
         # instead of each widget individually.
         self.widget_id = {'index': self.random_id, 'type': self.widget_type}
@@ -24,7 +30,7 @@ class BaseWidget:
         self.widget = html.Span([
             dbc.Row([
                 dbc.Button(id={'index': self.random_id, 'type': 'close_btn'}, class_name='btn-close'),
-                dbc.Button(id={'index': self.random_id, 'type': 'settings_btn'}, class_name='btn-close btn-settings')
+                dbc.Button(id={'index': self.random_id, 'type': 'settings_btn'}, class_name='btn-close btn-settings'),
             ], class_name='hover-row'),
             self.create_widget(),
             dbc.Offcanvas(
@@ -33,6 +39,7 @@ class BaseWidget:
                 title=self.widget_name,
                 is_open=False,
             ),
+            dcc.Store(id={'index': self.random_id, 'type': self.get_widget_data_type()}, data={'id': self.widget_id}),
         ], id=self.random_id, className='widget-container')
 
     # Return the actual widget element. This will be wrapped in an html <span> to make adding/removing/moving easier.
@@ -52,7 +59,11 @@ class BaseWidget:
             ]
         )
 
+    @classmethod
+    def get_widget_data_type(cls):
+        return cls.widget_type + '_data'
+
     # Create necessary callbacks in the app. This is a static method because it only needs to be run once for all widgets of a given type.
-    @staticmethod
-    def create_callback(app: Dash):
+    @classmethod
+    def create_callback(cls, app: Dash):
         pass
