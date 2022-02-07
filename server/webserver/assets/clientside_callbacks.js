@@ -1,17 +1,23 @@
-function binarySearch(array, target) {
-    let lo = 0, hi = array.length;
-    while (lo < hi) {
-        let mi = (lo + hi) >> 1;
-        let diff = target - array[mi].number;
-        if (diff === 0) return array[mi];
-        else if (diff < 0) hi = mi;
-        else lo = mi + 1;
+/**
+ * Return 0 <= i <= array.length such that !pred(array[i - 1]) && pred(array[i]).
+ */
+ function binarySearch(array, target) {
+    let lo = -1, hi = array.length;
+    while (1 + lo < hi) {
+        const mi = lo + ((hi - lo) >> 1);
+        if (array[mi] > target) {
+            hi = mi;
+        } else {
+            lo = mi;
+        }
     }
+    return hi;
 }
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         update_data_from_websockets: function(new_data, current_data, columns) {
+            const MAX_DATA_POINTS = 100;
 //            console.log(columns);
             // Parse data from the received string
             let parsed_data = JSON.parse(new_data);
@@ -43,62 +49,84 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 // Data came in-order, append to the end of the data list(s).
                 current_data.data = current_data.data.concat(parsed_data.data);
                 current_data.index = current_data.index.concat(parsed_data.index);
-                return [current_data, columns];
             } else {
                 // Data came out-of-order, find where to insert the new data
                 console.log("Data out of order");
                 let insert_index = binarySearch(current_data.index, parsed_data.index[0]);
                 current_data.index = current_data.index.slice(0, insert_index).concat(parsed_data.index).concat(current_data.index.slice(insert_index));
                 current_data.data = current_data.data.slice(0, insert_index).concat(parsed_data.data).concat(current_data.data.slice(insert_index));
-                return [current_data, columns];
             }
+
+            if(current_data.length > MAX_DATA_POINTS){
+                current_data = current_data.slice(current_data.length - MAX_DATA_POINTS);
+            }
+
+            return [current_data, columns];
         },
 
-        update_graph_from_data: function(data, figs) {
-//            console.log(figs);
-            return figs.map(function(figure){
-                if(!figure){
-                    return {
-                        data:[],
-                        layout:{
-                            autosize:true,
-                            margin: { t: 30 },
-                            xaxis: {
-                                anchor: "x",
-                                autorange: true,
-                                tickformatstops: [
-                                    {
-                                        "dtickrange": [null, 59999],
-                                        "value": "%H:%M:%S s"
-                                    },
-                                    {
-                                        "dtickrange": [59999, null],
-                                        "value": "%H:%M m"
-                                    }
-                                ],
-                                title: { text: "time" }
-                            },
-                            yaxis: {
-                                anchor: "y",
-                                autorange: true,
-                                title: { text: "int data" }
-                            },
-                        }
-                    };
-                }
-//                console.log(figure);
-                let y_text = figure.layout.yaxis.title.text; // TODO use data name instead
-                let data_column_idx = data.columns.findIndex(el => el === y_text);
-                if(data_column_idx == -1) {
-                    return figure;
-                }
+        update_graph_from_data: function(data, title, axes, persistence, max_points, line_style, fig) {
 
-                let fig_data = [{
-                    x: data.index,
-                    y: data.data.map(x => x[data_column_idx])
-                }];
-                return {'data': fig_data, 'layout': figure.layout}; // For some reason this is needed instead of just returning figure.
-            });
+            let fig_layout = {
+                title:title,
+                autosize:true,
+                margin: { t: 30 },
+                xaxis: {
+                    anchor: "x",
+                    autorange: true,
+                    tickformatstops: [
+                        {
+                            "dtickrange": [null, 59999],
+                            "value": "%H:%M:%S s"
+                        },
+                        {
+                            "dtickrange": [59999, null],
+                            "value": "%H:%M m"
+                        }
+                    ],
+                    title: { text: "time" }
+                },
+                yaxis: {
+                    anchor: "y",
+                    autorange: true,
+                    // title: { text: "int data" }
+                },
+            };
+            
+            if(!axes){
+                return {'data': [], 'layout': fig_layout};
+            }
+
+            let oldest_allowed = data.index[data.index.length - 1] - persistence * 1000.0;
+            let oldest_data_pt = Math.max(binarySearch(data.index, oldest_allowed), data.index.length - max_points);
+           
+            console.log(data.index.length);
+            console.log(oldest_data_pt);
+           
+            let fig_data = axes.map(
+                    axis => data.columns.findIndex(el => el === axis)
+                ).filter(idx => idx >= 0)
+                .map(function(idx){
+                return {
+                    x: data.index.slice(oldest_data_pt),
+                    y: data.data.slice(oldest_data_pt).map(x => x[idx]),
+                    mode: line_style,
+                    name: data.columns[idx]
+                }});
+
+
+            return {'data': fig_data, 'layout': fig_layout};
+
+            
+
+
+            // let data_column_idx = data.columns.findIndex(el => el === '');
+            // if(data_column_idx == -1) {
+            //     return {'data': [], 'layout': fig_layout};
+            // }
+
+
+
+            // return {'data': fig_data, 'layout': fig_layout}; // For some reason this is needed instead of just returning figure.
         },
 
         update_number_widget: function(data, labels) {
@@ -117,19 +145,21 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             for(var i = 0; i < labels.length; i++){
                 let data_column_idx = data.columns.findIndex(el => el === labels[i]);
                 if(data_column_idx < 0){
-                    output.push(0)
+                    output.push(0);
+                }else{
+                    let value = data.data[data.data.length-1][data_column_idx];
+                    let previous_val = (''+current_value[i]).replace('-','');
+                    previous_length = ('' + previous_val).length;
+                    new_int_length = ('' + value.toFixed()).length;
+                    new_length = ('' + value).length;
+                    if(new_length === new_int_length){
+                        output.push(('000000' + value).slice(-(Math.max(new_length, previous_length).toFixed())));
+                    } else {
+                        let min_decimals = 5 - new_int_length;
+                        output.push(value.toFixed(Math.max(min_decimals, previous_length - new_int_length - 1)));
+                    }
                 }
-                let value = data.data[data.data.length-1][data_column_idx];
-                let previous_val = (''+current_value[i]).replace('-','');
-                previous_length = ('' + previous_val).length;
-                new_int_length = ('' + value.toFixed()).length;
-                new_length = ('' + value).length;
-                if(new_length === new_int_length){
-                    output.push(('000000' + value).slice(-(Math.max(new_length, previous_length).toFixed())));
-                } else {
-                    let min_decimals = 5 - new_int_length;
-                    output.push(value.toFixed(Math.max(min_decimals, previous_length - new_int_length - 1)));
-                }
+
             }
             return output;
         },

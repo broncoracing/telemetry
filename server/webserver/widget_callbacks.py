@@ -74,3 +74,13 @@ def create_widget_management_callbacks(app):
         print(data)
         return [{"label": i, "value": i} for i in data]
 
+    # Adds the current data options to the graph dropdown menu
+    @app.callback(
+        Output({'type': 'graph_axis_dropdown', 'index': MATCH}, 'options'),
+        Input({'type': 'settings_btn', 'index': MATCH}, 'n_clicks'),
+        State("telemetry_data_columns", "data")
+    )
+    def update_value_dropdown(_n, data):
+        print(data)
+        return [{"label": i, "value": i} for i in data]
+
