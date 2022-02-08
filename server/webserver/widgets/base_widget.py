@@ -39,7 +39,7 @@ class BaseWidget:
                 title=self.widget_name,
                 is_open=False,
             ),
-            dcc.Store(id={'index': self.random_id, 'type': self.get_widget_data_type()}, data={'id': self.widget_id}),
+            dcc.Store(id={'index': self.random_id, 'type': self.get_widget_data_type()}, data=saved_data if saved_data is not None else {'id': self.widget_id}),
         ], id=self.random_id, className='widget-container')
 
     # Return the actual widget element. This will be wrapped in an html <span> to make adding/removing/moving easier.

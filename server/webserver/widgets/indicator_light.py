@@ -8,8 +8,8 @@ class IndicatorLight(BaseWidget):
     widget_name = "Indicator Light"
     widget_type = "Indicator"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, saved_data=None):
+        super().__init__(saved_data)
 
     def create_widget(self):
         return daq.Indicator(

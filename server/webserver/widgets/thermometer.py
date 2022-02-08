@@ -8,8 +8,8 @@ class Thermometer(BaseWidget):
     widget_name = "Thermometer"
     widget_type = "Thermometer"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, saved_data=None):
+        super().__init__(saved_data)
 
     def create_widget(self):
         return daq.Thermometer(

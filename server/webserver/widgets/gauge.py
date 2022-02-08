@@ -8,8 +8,8 @@ class Gauge(BaseWidget):
     widget_name = "Gauge"
     widget_type = "Gauge"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, saved_data=None):
+        super().__init__(saved_data)
 
     def create_widget(self):
         return daq.Gauge(
@@ -63,9 +63,12 @@ class Gauge(BaseWidget):
             [Input({'type': 'value_dropdown', 'index': MATCH}, 'value'),
              Input({'type': 'gauge_min_value', 'index': MATCH}, 'value'),
              Input({'type': 'gauge_max_value', 'index': MATCH}, 'value')],
-            [State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')]
+            [State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
+             State({'type': 'settings_btn', 'index': MATCH}, 'n_clicks')]
         )
-        def update_settings(value, scale_min, scale_max, data):
+        def update_settings(value, scale_min, scale_max, data, settings_clicks):
+            if settings_clicks is None or settings_clicks == 0:
+                raise PreventUpdate
             print(data)
 
             if value is None:

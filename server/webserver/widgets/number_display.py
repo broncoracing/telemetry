@@ -8,8 +8,8 @@ class NumberDisplay(BaseWidget):
     widget_name = "Number Display"
     widget_type = "NumberDisplay"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, saved_data=None):
+        super().__init__(saved_data)
 
     def create_widget(self):
         return daq.LEDDisplay(

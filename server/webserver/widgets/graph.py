@@ -9,8 +9,8 @@ class Graph(BaseWidget):
     widget_name = "Graph"
     widget_type = "Graph"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, saved_data=None):
+        super().__init__(saved_data)
 
     def create_widget(self):
         return dcc.Graph(

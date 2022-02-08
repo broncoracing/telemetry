@@ -2,6 +2,8 @@ import dash
 from dash import Input, Output, html, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
+
+from .persistence import load_widgets, load_layouts
 from .widgets import telemetry_widgets
 
 
@@ -20,20 +22,18 @@ dropdown = dbc.DropdownMenu(
 
 
 # Create callbacks for the widget creation dropdown
-def create_widget_management_callbacks(app):
+def create_widget_management_callbacks(app, save_dir):
     # This is called when a dropdown item is selected.
     @app.callback(
-        Output("draggable", "children"),
-        Input({'type': ADD_DROPDOWN_TYPE, 'index': ALL}, 'n_clicks'),
-        Input({'type': 'close_btn', 'index': ALL}, 'n_clicks'),
-        State("draggable", "children"),
+        [Output("draggable", "children"), Output("dummy_after_load", "data")],
+        [Input({'type': ADD_DROPDOWN_TYPE, 'index': ALL}, 'n_clicks'),
+         Input({'type': 'close_btn', 'index': ALL}, 'n_clicks'),
+         Input({'type': 'load-option', 'index': ALL}, 'n_clicks')],
+        State("draggable", "children")
     )
-    def add_or_remove_widget(create, close, children):
-        if all(val == 0 for val in create) and all(val == 0 for val in close):
-            raise PreventUpdate
+    def add_or_remove_widget(create, close, load, children):
 
         ctx = dash.callback_context
-
         # handle mystery clicks (nothing was actually pressed
         if not ctx.triggered:
             raise PreventUpdate
@@ -43,15 +43,40 @@ def create_widget_management_callbacks(app):
             # print(button_id)
 
             if button_id in telemetry_widgets.keys():
+                if all(val == 0 for val in create):
+                    raise PreventUpdate
+
                 # Create the widget and add it to the layout.
                 new_item = telemetry_widgets[button_id]()
                 children.append(new_item.widget)
+            elif 'load_layout-' in button_id:
+                if all(val is None for val in load) or all(val == 0 for val in load):
+                    raise PreventUpdate
+                # Load a layout
+                layout_filename = button_id[12:]
+                children = load_widgets(save_dir, layout_filename)
+                # print(children)
+                return [children, layout_filename]
+
             else:
+                if all(val == 0 for val in close):
+                    raise PreventUpdate
+                # Remove a widget
                 for child in children:
                     if child['props']['id'] == button_id:
                         children.remove(child)
 
-            return children
+            return [children, None]
+
+    @app.callback(
+        Output("draggable", "layouts"),
+        Input("dummy_after_load", "data")
+    )
+    def load_layout(filename):
+        if filename is None or not filename:
+            raise PreventUpdate
+
+        return load_layouts(save_dir, filename)
 
     # callback to toggle the settings menu visibility
     @app.callback(
@@ -83,4 +108,3 @@ def create_widget_management_callbacks(app):
     def update_value_dropdown(_n, data):
         print(data)
         return [{"label": i, "value": i} for i in data]
-
