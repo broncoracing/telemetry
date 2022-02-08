@@ -128,18 +128,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
 
 
             return {'data': fig_data, 'layout': fig_layout};
-
-            
-
-
-            // let data_column_idx = data.columns.findIndex(el => el === '');
-            // if(data_column_idx == -1) {
-            //     return {'data': [], 'layout': fig_layout};
-            // }
-
-
-
-            // return {'data': fig_data, 'layout': fig_layout}; // For some reason this is needed instead of just returning figure.
         },
 
         update_number_widget: function(data, labels) {
@@ -152,29 +140,26 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 return data.data[data.data.length-1][data_column_idx];
             });
         },
-        update_number_display: function(data, labels, current_value) {
-//            console.log(labels);
-            output = new Array();
-            for(var i = 0; i < labels.length; i++){
-                let data_column_idx = data.columns.findIndex(el => el === labels[i]);
-                if(data_column_idx < 0){
-                    output.push(0);
-                }else{
-                    let value = data.data[data.data.length-1][data_column_idx];
-                    let previous_val = (''+current_value[i]).replace('-','');
-                    previous_length = ('' + previous_val).length;
-                    new_int_length = ('' + value.toFixed()).length;
-                    new_length = ('' + value).length;
-                    if(new_length === new_int_length){
-                        output.push(('000000' + value).slice(-(Math.max(new_length, previous_length).toFixed())));
-                    } else {
-                        let min_decimals = 5 - new_int_length;
-                        output.push(value.toFixed(Math.max(min_decimals, previous_length - new_int_length - 1)));
-                    }
-                }
-
+        update_number_display: function(data, settings, current_value) {
+            if(!settings.hasOwnProperty('value')){
+                return [0, 'No source'];
             }
-            return output;
+            let data_column_idx = data.columns.findIndex(el => el === settings.value);
+            if(data_column_idx < 0){
+                return [0, 'No source'];
+            }else{
+                let value = data.data[data.data.length-1][data_column_idx];
+                let previous_val = (''+current_value).replace('-','');
+                previous_length = ('' + previous_val).length;
+                new_int_length = ('' + value.toFixed()).length;
+                new_length = ('' + value).length;
+                if(new_length === new_int_length){
+                    return [('000000' + value).slice(-(Math.max(new_length, previous_length).toFixed())), settings.value];
+                } else {
+                    let min_decimals = 5 - new_int_length;
+                    return [value.toFixed(Math.max(min_decimals, previous_length - new_int_length - 1)), settings.value];
+                }
+            }
         },
 
         update_thermometer_widget: function(data, settings) {
@@ -198,13 +183,13 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         update_indicator: function(data, settings) {
 
             if(!settings.hasOwnProperty('value')){
-                return false;
+                return [false, 'No source'];
             }
             let data_column_idx = data.columns.findIndex(el => el === settings.value);
             if(data_column_idx < 0){
-                return 0;
+                return [false, 'No source'];
             }
-            return data.data[data.data.length-1][data_column_idx] > 0;
+            return [data.data[data.data.length-1][data_column_idx] > 0, settings.value];
         },
     }
 });

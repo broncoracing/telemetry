@@ -32,15 +32,15 @@ class IndicatorLight(BaseWidget):
                 namespace='clientside',
                 function_name='update_indicator'
             ),
-            Output({'type': "Indicator", 'index': MATCH}, 'value'),
+            [Output({'type': "Indicator", 'index': MATCH}, 'value'),
+             Output({'type': "Indicator", 'index': MATCH}, 'label')],
             Input('telemetry_data', 'data'),
             State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
         )
 
         # Data source changed
         @app.callback(
-            [Output({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
-             Output({'type': "Indicator", 'index': MATCH}, 'label')],
+            Output({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
             Input({'type': 'value_dropdown', 'index': MATCH}, 'value'),
             State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
         )
@@ -49,4 +49,4 @@ class IndicatorLight(BaseWidget):
                 val = 'No source'
 
             data['value'] = val
-            return [data, val]
+            return data

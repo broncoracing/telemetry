@@ -29,10 +29,11 @@ class NumberDisplay(BaseWidget):
                 namespace='clientside',
                 function_name='update_number_display'
             ),
-            Output({'type': "NumberDisplay", 'index': ALL}, 'value'),
+            [Output({'type': "NumberDisplay", 'index': MATCH}, 'value'),
+             Output({'type': "NumberDisplay", 'index': MATCH}, 'label')],
             Input('telemetry_data', 'data'),
-            State({'type': "NumberDisplay", 'index': ALL}, 'label'),
-            State({'type': "NumberDisplay", 'index': ALL}, 'value')
+            State({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data'),
+            State({'type': "NumberDisplay", 'index': MATCH}, 'value')
         )
 
         # Data source changed
@@ -47,14 +48,3 @@ class NumberDisplay(BaseWidget):
             data['value'] = val
             return data
 
-        @app.callback(
-            Output({'type': "NumberDisplay", 'index': MATCH}, 'label'),
-            Input({'type': cls.get_widget_data_type(), 'index': MATCH}, 'data')
-        )
-        def set_label(data):
-            if data is None:
-                return 'No data'
-            elif 'value' in data.keys():
-                return data['value']
-            else:
-                return 'No data'
