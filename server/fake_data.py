@@ -1,7 +1,7 @@
 import asyncio
 import random
 import pandas as pd
-FREQUENCY = 10  # frequency to send new data in Hz
+FREQUENCY = 100  # frequency to send new data in Hz
 
 
 def get_random_data():
@@ -21,7 +21,7 @@ class DataFeeder:
 
     async def read_forever(self):
         print('Starting fake data generator')
-        if FREQUENCY > 100:
+        if FREQUENCY > 50:
             while True:
                 for i in range(10):
                     self.data_callback(read_frame())

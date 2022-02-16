@@ -1,11 +1,21 @@
+import asyncio
+import datetime
+from pathlib import Path
+import os
 import pandas as pd
 
 
 class DataQueue:
-    def __init__(self, csv_path, write_frequency, max_age):
-        self.csv_path = csv_path
-        self.write_frequency = write_frequency
+    FUTURE = pd.Timestamp("2100-01-01")  # TODO: Update this in 87 years so that the telemetry dashboard doesn't break
+
+    def __init__(self, csv_dir: Path, write_delay, max_age):
+        self.write_delay = write_delay
         self.max_age = max_age
+        self.last_written_timestamp = pd.Timestamp("1970-01-01")  # Initialize this in the past so that we don't miss any data
+        timestamp = datetime.datetime.now().isoformat(sep='_', timespec='seconds')
+        self.csv_file_path = csv_dir / (timestamp + '.csv')
+        print('Saving data to: {}'.format(self.csv_file_path))
+
         self.data = pd.DataFrame(columns=('timestamp',))
         self.data = self.data.set_index('timestamp')
         self.new_data = pd.DataFrame(columns=('timestamp',))
@@ -38,3 +48,22 @@ class DataQueue:
 
     def read_all_data(self):
         return self.data
+
+    # Save the unwritten data to a csv file.
+    # Note: This will mess up the CSV format if the columns change between writes, because the header won't be updated
+    def save_to_file(self):
+        # Get the new data
+        df = self.data.loc[self.last_written_timestamp:self.FUTURE]
+        # Update the last written timestamp
+        self.last_written_timestamp: pd.Timestamp = self.data.index[-1]
+        # Write to CSV in append mode, and only write a header if the file doesn't exist (so it's at the top of the file).
+        df.to_csv(self.csv_file_path, mode='a', header=not os.path.exists(self.csv_file_path))
+
+        # Truncate the saved data to prevent it from filling memory over time. This is done *after* writing so that there's no chance
+        # data is lost.
+        self.data = self.data.loc[self.last_written_timestamp - pd.Timedelta(self.max_age):self.FUTURE]
+
+    async def stream_to_file(self):
+        while True:
+            await asyncio.sleep(self.write_delay)
+            self.save_to_file()

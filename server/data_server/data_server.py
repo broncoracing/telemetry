@@ -16,7 +16,8 @@ class DataServer:
     async def start_server(self):
         tasks = [
             websockets.serve(self.publisher, 'localhost', 5678),  # Start server & connect to new clients
-            self.broadcast_forever()  # Broadcast incomming data forever
+            self.broadcast_forever(),  # Broadcast incomming data forever
+            self.data_queue.stream_to_file()
         ]
         await asyncio.gather(*tasks)  # Run both tasks in parallel
 
