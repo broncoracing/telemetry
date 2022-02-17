@@ -6,11 +6,11 @@
 \title{DashWebsocket component}
 
 \description{
-DashWebsocket is an adapter for websocket. It takes two property, `url` and 'msg' `url` indicates the websocket url `msg` display the message returns from webscoket
+DashWebsocket is an adapter for websocket. It takes two property, `port` and 'msg' `port` indicates the websocket url port `msg` display the message returns from webscoket
 }
 
 \usage{
-dashWebsocket(id=NULL, msg=NULL, url=NULL)
+dashWebsocket(id=NULL, msg=NULL, port=NULL)
 }
 
 \arguments{
@@ -18,7 +18,7 @@ dashWebsocket(id=NULL, msg=NULL, url=NULL)
 
 \item{msg}{Character. The websocket response message.}
 
-\item{url}{Character. The url for websocket.}
+\item{port}{Character. The port for websocket.}
 }
 
 \value{named list of JSON elements corresponding to React.js properties and their values}

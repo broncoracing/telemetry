@@ -4,13 +4,15 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 /**
  * DashWebsocket is an adapter for websocket.
- * It takes two property, `url` and 'msg'
- * `url` indicates the websocket url
+ * It takes two property, `port` and 'msg'
+ * `port` indicates the websocket url port
  * `msg` display the message returns from webscoket
  */
 export default class DashWebsocket extends Component {
     componentDidMount() {
-        const url = this.props.url;
+        const doc_url = new URL(document.URL)
+        const url = "ws://" + doc_url.hostname + ':' + this.props.port;
+        console.log('Websocket client connecting to ' + url);
         const client = new W3CWebSocket(url);
         client.onopen = () => {
             console.log('websocket connected');
@@ -40,9 +42,9 @@ DashWebsocket.propTypes = {
     msg: PropTypes.string,
 
     /**
-     * The url for websocket.
+     * The port for websocket.
      */
-    url: PropTypes.string.isRequired,
+    port: PropTypes.string.isRequired,
 
     /**
      * Dash-assigned callback that should be called to report property changes

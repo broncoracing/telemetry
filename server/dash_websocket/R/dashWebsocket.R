@@ -1,9 +1,8 @@
 # AUTO GENERATED FILE - DO NOT EDIT
 
-#' @export
-dashWebsocket <- function(id=NULL, msg=NULL, url=NULL) {
+dashWebsocket <- function(id=NULL, msg=NULL, port=NULL) {
     
-    props <- list(id=id, msg=msg, url=url)
+    props <- list(id=id, msg=msg, port=port)
     if (length(props) > 0) {
         props <- props[!vapply(props, is.null, logical(1))]
     }
@@ -11,7 +10,7 @@ dashWebsocket <- function(id=NULL, msg=NULL, url=NULL) {
         props = props,
         type = 'DashWebsocket',
         namespace = 'dash_websocket',
-        propNames = c('id', 'msg', 'url'),
+        propNames = c('id', 'msg', 'port'),
         package = 'dashWebsocket'
         )
 

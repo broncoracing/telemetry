@@ -1,8 +1,8 @@
 cd dash_websocket || exit
-source venv/bin/activate
+rm dist/dash_websocket-*.tar.gz
+npm install
+pip3 install -r requirements.txt
 npm run build
-python setup.py sdist
-deactivate
+python3 setup.py sdist
 cd ..
-source venv/bin/activate
-pip install dash_websocket/dist/dash_websocket-*.tar.gz
+pip3 install dash_websocket/dist/dash_websocket-*.tar.gz

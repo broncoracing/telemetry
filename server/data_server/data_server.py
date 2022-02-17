@@ -8,14 +8,16 @@ from data_server.data_queue import DataQueue
 
 
 class DataServer:
-    def __init__(self, frequency, data_queue):
+    def __init__(self, frequency, data_queue, port, host='0.0.0.0'):
         self.data_queue = data_queue
         self.frequency = frequency
+        self.port = port
+        self.host = host
         self.clients = set()
 
     async def start_server(self):
         tasks = [
-            websockets.serve(self.publisher, 'localhost', 5678),  # Start server & connect to new clients
+            websockets.serve(self.publisher, self.host, self.port),  # Start server & connect to new clients
             self.broadcast_forever(),  # Broadcast incomming data forever
             self.data_queue.stream_to_file()
         ]

@@ -11,7 +11,8 @@ class DataQueue:
     def __init__(self, csv_dir: Path, write_delay, max_age):
         self.write_delay = write_delay
         self.max_age = max_age
-        self.last_written_timestamp = pd.Timestamp("1970-01-01")  # Initialize this in the past so that we don't miss any data
+        # Initialize this in the past so that we don't miss any data
+        self.last_written_timestamp = pd.Timestamp("1970-01-01")
         timestamp = datetime.datetime.now().isoformat(sep='_', timespec='seconds')
         self.csv_file_path = csv_dir / (timestamp + '.csv')
         print('Saving data to: {}'.format(self.csv_file_path))
@@ -56,11 +57,12 @@ class DataQueue:
         df = self.data.loc[self.last_written_timestamp:self.FUTURE]
         # Update the last written timestamp
         self.last_written_timestamp: pd.Timestamp = self.data.index[-1]
-        # Write to CSV in append mode, and only write a header if the file doesn't exist (so it's at the top of the file).
+        # Write to CSV in append mode, and only write a header if the file doesn't exist
+        # (so it's at the top of the file).
         df.to_csv(self.csv_file_path, mode='a', header=not os.path.exists(self.csv_file_path))
 
-        # Truncate the saved data to prevent it from filling memory over time. This is done *after* writing so that there's no chance
-        # data is lost.
+        # Truncate the saved data to prevent it from filling memory over time.
+        # This is done *after* writing so that there's no chance data is lost.
         self.data = self.data.loc[self.last_written_timestamp - pd.Timedelta(self.max_age):self.FUTURE]
 
     async def stream_to_file(self):

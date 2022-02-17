@@ -1,6 +1,6 @@
 {
   "src/lib/components/DashWebsocket.react.js": {
-    "description": "DashWebsocket is an adapter for websocket.\nIt takes two property, `url` and 'msg'\n`url` indicates the websocket url\n`msg` display the message returns from webscoket",
+    "description": "DashWebsocket is an adapter for websocket.\nIt takes two property, `port` and 'msg'\n`port` indicates the websocket url port\n`msg` display the message returns from webscoket",
     "displayName": "DashWebsocket",
     "methods": [],
     "props": {
@@ -18,12 +18,12 @@
         "required": false,
         "description": "The websocket response message."
       },
-      "url": {
+      "port": {
         "type": {
           "name": "string"
         },
         "required": true,
-        "description": "The url for websocket."
+        "description": "The port for websocket."
       },
       "setProps": {
         "type": {

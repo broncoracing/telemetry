@@ -10,14 +10,12 @@ parser.add_argument('--save_dir', '-s', type=str, default='saved_layouts/',
                     help='Where to save/look for saved layouts')
 
 
-
 def main():
     args = parser.parse_args()
     if args.debug:
         print('Running webserver in debug mode!')
 
     webserver = Webserver(debug=args.debug, port=args.port, save_dir=args.save_dir)
-
     webserver.run()
 
 

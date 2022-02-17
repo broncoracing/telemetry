@@ -76,7 +76,7 @@ class Webserver:
                 dark=True,
             ),
 
-            dash_websocket.DashWebsocket(id='ws', url='ws://127.0.0.1:5678'),  # woohoo custom component!
+            dash_websocket.DashWebsocket(id='ws', port='5678'),  # woohoo custom component!
 
             # Grid layout contains all of the resizable/movable components.
             dash_draggable.ResponsiveGridLayout(
@@ -236,4 +236,10 @@ class Webserver:
                 return button_id[12:]
 
     def run(self):
-        self.app.run_server(debug=self.debug, port=self.port)
+        if self.debug:
+            # Run on localhost with debug setting turned on
+            self.app.run_server(debug=True, port=self.port)
+        else:
+            # run with host 0.0.0.0 and debug turned off
+            self.app.run_server(host='0.0.0.0', debug=False, port=self.port)
+
