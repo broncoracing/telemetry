@@ -390,3 +390,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# Saved CSV data
+server/saved_data/*.csv
+
