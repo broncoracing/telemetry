@@ -120,6 +120,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 ).filter(idx => idx >= 0)
                 .map(function(idx){
                 return {
+                    type: 'scattergl',
                     x: data.index.slice(oldest_data_pt),
                     y: data.data.slice(oldest_data_pt).map(x => x[idx]),
                     mode: line_style,

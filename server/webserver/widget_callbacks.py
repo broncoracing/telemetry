@@ -96,6 +96,8 @@ def create_widget_management_callbacks(app, save_dir):
         State("telemetry_data_columns", "data")
     )
     def update_value_dropdown(_n, data):
+        if data is None:
+            data = []
         print(data)
         return [{"label": i, "value": i} for i in data]
 
@@ -106,5 +108,7 @@ def create_widget_management_callbacks(app, save_dir):
         State("telemetry_data_columns", "data")
     )
     def update_value_dropdown(_n, data):
+        if data is None:
+            data = []
         print(data)
         return [{"label": i, "value": i} for i in data]

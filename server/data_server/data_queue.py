@@ -56,7 +56,8 @@ class DataQueue:
         # Get the new data
         df = self.data.loc[self.last_written_timestamp:self.FUTURE]
         # Update the last written timestamp
-        self.last_written_timestamp: pd.Timestamp = self.data.index[-1]
+        if len(self.data) > 0:
+            self.last_written_timestamp: pd.Timestamp = self.data.index[-1]
         # Write to CSV in append mode, and only write a header if the file doesn't exist
         # (so it's at the top of the file).
         df.to_csv(self.csv_file_path, mode='a', header=not os.path.exists(self.csv_file_path))
