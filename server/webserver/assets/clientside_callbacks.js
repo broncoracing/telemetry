@@ -192,5 +192,29 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             return [data.data[data.data.length-1][data_column_idx] > 0, settings.value];
         },
+
+
+        // Update connection/FPS indicator
+        update_fps: function(_data, _n, count, color) {
+            let triggered = dash_clientside.callback_context.triggered[0].prop_id;
+            console.log(triggered);
+            if(triggered === "telemetry_data.data"){
+                return [count + 1, dash_clientside.no_update, dash_clientside.no_update];
+            }else if(triggered === "connection_check.n_intervals") {
+                let fps = count;
+
+                // No data received
+                if(fps === 0){
+                    if(color === "info"){ // Still waiting for first data
+                        return [0, dash_clientside.no_update, dash_clientside.no_update]
+                    }
+                    //
+                    return [0, "Connection lost", "danger"]
+                }
+                return [0, "Connected, " + fps + " FPS", "success"]
+            }
+
+            return [0, dash_clientside.no_update, dash_clientside.no_update]
+        }
     }
 });

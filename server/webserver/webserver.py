@@ -39,6 +39,11 @@ class Webserver:
             # Stores the data column headers but not the data itself. This is used to update dropdowns/settings.
             dcc.Store(id='telemetry_data_columns'),
 
+            # Stores the number of frames since the last update to the connection indicator
+            dcc.Store(id='data_counter', data=0),
+            # Used to fire a connection/FPS check every second
+            dcc.Interval(id='connection_check'),
+
             # Navbar on top holds logo/heading, and buttons/links to add stuff or save/load.
             dbc.Navbar(
                 dbc.Container(
@@ -49,6 +54,8 @@ class Webserver:
                                 dbc.Col(dbc.NavbarBrand("Telemetry Dashboard", className="ms-2")),
                                 dbc.Col(
                                     dbc.Badge("Not saved", color="warning", className="me-1", id='saved-indicator')),
+                                dbc.Col(
+                                    dbc.Badge("Waiting for connection", color="warning", className="me-1", id='connection-indicator')),
                             ],
                             align="center",
                             className="g-0",
@@ -234,6 +241,21 @@ class Webserver:
                 button_id = ctx.triggered[0]['prop_id'].split('"')[3]
                 # print(button_id)
                 return button_id[12:]
+
+        # FPS counter callback
+        self.app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='update_fps'
+            ),
+            [Output('data_counter', 'data'),
+             Output('connection-indicator', 'children'),
+             Output('connection-indicator', 'color')],
+            [Input('telemetry_data', 'data'),
+             Input('connection_check', 'n_intervals')],
+            [State('data_counter', 'data'),
+             State('connection-indicator', 'color')]
+        )
 
     def run(self):
         if self.debug:

@@ -26,7 +26,6 @@ async def main():
     else:
         from data_reader.can_data import DataFeeder
 
-
     data_provider = DataFeeder(data_queue.add_row)
 
     tasks = [
