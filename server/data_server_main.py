@@ -13,6 +13,8 @@ parser.add_argument('--save_dir', '-s', type=str, default='saved_data/',
                     help='Where to save/look for saved csv files of data')
 parser.add_argument('--fake_data', '-f', default=False, action='store_const', const=True,
                     help='Use fake generated data instead of reading from the CAN bus')
+parser.add_argument('--serial', default=None, type=str,
+                    help='Use a serial device (Ex: /dev/ttyUSB0) instead of socketcan for input data')
 
 
 async def main():
@@ -23,10 +25,14 @@ async def main():
 
     if args.fake_data:
         from data_reader.fake_data import DataFeeder
+        data_provider = DataFeeder(data_queue.add_row)
+    elif args.serial is not None:
+        from data_reader.serial_can_data import DataFeeder
+        print('Using serial for CAN data')
+        data_provider = DataFeeder(data_queue.add_row, args.serial)
     else:
         from data_reader.can_data import DataFeeder
-
-    data_provider = DataFeeder(data_queue.add_row)
+        data_provider = DataFeeder(data_queue.add_row)
 
     tasks = [
         data_server.start_server(),

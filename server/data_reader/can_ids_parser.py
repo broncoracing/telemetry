@@ -1,32 +1,56 @@
 import re
 
+from data_reader.can_formats import scaled_reader, Format, bool_reader
+
 IGNORED_DEFINES = [
     'CAN_BAUD',
 ]
 
-
-def int_reader(data):
-    output = 0
-    for byte in data:
-        output = output << 8
-        output += byte
-    return output
-
-
-class Format:
-    def __init__(self, offset, length, reader=int_reader, name=None):
-        self.offset = offset
-        self.length = length
-        self.reader = reader
-        self.name = name if name is not None else str(offset)
-
-    def read(self, data):
-
-        return self.reader(data[self.offset:self.offset + self.length])
-
-
 data_formats = {
-    'THERMOCOUPLE_1_ID': [Format(0, 2, name='Channel 1'), Format(2, 2, name='Channel 2'), Format(4, 2, name='Channel 3'), Format(6, 2, name='Channel 4')]
+    'BCM_STATUS_ID': [  # TODO Add format once implemented in BCM firmware
+
+    ],
+
+    'STEERING_WHEEL_ID': [
+        Format(0, 1, name='DRS State',  reader=bool_reader),
+        Format(1, 1, name='Upshift',    reader=bool_reader),
+        Format(2, 1, name='Downshift',  reader=bool_reader),
+    ],
+
+    'THERMOCOUPLE1_ID': [
+        Format(0, 2, name='Channel 1'),
+        Format(2, 2, name='Channel 2'),
+        Format(4, 2, name='Channel 3'),
+        Format(6, 2, name='Channel 4')
+    ],
+    'THERMOCOUPLE2_ID': [
+        Format(0, 2, name='Channel 1'),
+        Format(2, 2, name='Channel 2'),
+        Format(4, 2, name='Channel 3'),
+        Format(6, 2, name='Channel 4')
+    ],
+
+    'ECU1_ID': [
+        Format(0, 2, name="Engine RPM"),
+    ],
+    'ECU2_ID': [
+        Format(0, 2, name="Oil Temperature",        reader=scaled_reader(1.0)),  # TODO Set offsets/scaling correctly
+        Format(2, 2, name="Water Temperature",      reader=scaled_reader(1.0)),  # TODO Set offsets/scaling correctly
+        Format(4, 2, name="Intake Air Temperature", reader=scaled_reader(1.0)),  # TODO Set offsets/scaling correctly
+    ],
+    'ECU3_ID': [
+        Format(0, 2, name="Oil Pressure",    reader=scaled_reader(1.0)),         # TODO Set scaling correctly
+        Format(4, 2, name="Battery Voltage", reader=scaled_reader(1.0 / 1000.0)),
+    ],
+
+    'DBW_SENSORS_ID': [
+        Format(0, 2, name="APPS", reader=scaled_reader(1.0 / 1000.0)),           # TODO Set scaling correctly
+        Format(2, 2, name="TPS",  reader=scaled_reader(1.0 / 1000.0)),           # TODO Set scaling correctly
+    ],
+
+    'BRAKE_PRESSURE_ID': [
+        Format(0, 2, name="BSE", reader=scaled_reader(1.0 / 1000.0)),            # TODO Set scaling correctly
+    ],
 }
 
 
