@@ -26,6 +26,7 @@ class Webserver:
         self.debug = debug
         self.port = port
         self.save_dir = Path(save_dir)
+        # self.pipe = pipe
 
         # Initialize app
         # prevent_initial_callbacks=True prevents the update callbacks from being called on creation
@@ -258,7 +259,7 @@ class Webserver:
         )
 
     def run(self):
-        if self.debug:
+        if self.debug and False:
             # Run on localhost with debug setting turned on
             self.app.run_server(debug=True, port=self.port)
         else:

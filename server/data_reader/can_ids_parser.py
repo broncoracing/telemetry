@@ -31,12 +31,14 @@ data_formats = {
     ],
 
     'ECU1_ID': [
-        Format(0, 2, name="Engine RPM"),
+        Format(0, 2, name="Engine RPM", reader=scaled_reader(ms_first=True)),
+        Format(2, 2, name="Lambda", reader=scaled_reader(multiplier=1.0/1000.0, ms_first=True)),
     ],
     'ECU2_ID': [
-        Format(0, 2, name="Oil Temperature",        reader=scaled_reader(1.0)),  # TODO Set offsets/scaling correctly
-        Format(2, 2, name="Water Temperature",      reader=scaled_reader(1.0)),  # TODO Set offsets/scaling correctly
-        Format(4, 2, name="Intake Air Temperature", reader=scaled_reader(1.0)),  # TODO Set offsets/scaling correctly
+        Format(0, 1, name="Oil Temperature",        reader=scaled_reader(1.0)),
+        Format(1, 2, name="ECT",                    reader=scaled_reader(1.0 / 10.0)),
+        Format(3, 2, name="Intake Air Temperature", reader=scaled_reader(1.0 / 10.0)),
+        Format(5, 2, name="Rad Temp",               reader=scaled_reader(1.0 / 10.0)),
     ],
     'ECU3_ID': [
         Format(0, 2, name="Oil Pressure",    reader=scaled_reader(1.0)),         # TODO Set scaling correctly
@@ -44,12 +46,14 @@ data_formats = {
     ],
 
     'DBW_SENSORS_ID': [
-        Format(0, 2, name="APPS", reader=scaled_reader(1.0 / 1000.0)),           # TODO Set scaling correctly
-        Format(2, 2, name="TPS",  reader=scaled_reader(1.0 / 1000.0)),           # TODO Set scaling correctly
+        Format(0, 1, name="APPS",       reader=scaled_reader(10.0)),           # TODO Set scaling correctly
+        Format(1, 1, name="APPS (sub)", reader=scaled_reader(10.0)),           # TODO Set scaling correctly
+        Format(2, 1, name="TPS",        reader=scaled_reader(10.0)),           # TODO Set scaling correctly
+        Format(3, 1, name="TPS (sub)",  reader=scaled_reader(10.0)),           # TODO Set scaling correctly
     ],
 
     'BRAKE_PRESSURE_ID': [
-        Format(0, 2, name="BSE", reader=scaled_reader(1.0 / 1000.0)),            # TODO Set scaling correctly
+        Format(0, 2, name="BSE", reader=scaled_reader(ms_first=True)),
     ],
 }
 

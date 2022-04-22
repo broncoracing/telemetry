@@ -10,12 +10,21 @@ def bool_reader(data):
     return not all([b == 0 for b in data])
 
 
-def scaled_reader(multiplier, offset=0):
+def scaled_reader(multiplier=1.0, offset=0, ms_first=False, signed=False):
     def reader(data):
         output = 0
-        for byte in reversed(data):
-            output = output << 8
-            output += byte
+        if ms_first:
+            for byte in data:
+                output = output << 8
+                output += byte
+        else:
+            for byte in reversed(data):
+                output = output << 8
+                output += byte
+
+        if signed:
+            if output >= 256 * (2 ** (len(data) - 1)):
+                output -= 256 * (2 ** len(data))
         return float(output) * multiplier + offset
 
     return reader

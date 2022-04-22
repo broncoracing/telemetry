@@ -70,7 +70,8 @@ def verify_can_checksum(bts):
 
 
 class DataFeeder:
-    def __init__(self, data_callback, serial_port='/dev/ttyUSB0'):
+    def __init__(self, data_callback, serial_port='/dev/ttyUSB0'
+                                                  ''):
         self.data_callback = data_callback
         can_ids_path = Path(__file__).parent.parent / 'can-ids' / 'CAN_IDS.h'
         self.can_ids = parse_can_ids(can_ids_path)
