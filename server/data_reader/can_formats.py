@@ -23,8 +23,8 @@ def scaled_reader(multiplier=1.0, offset=0, ms_first=False, signed=False):
                 output += byte
 
         if signed:
-            if output >= 256 * (2 ** (len(data) - 1)):
-                output -= 256 * (2 ** len(data))
+            if output >= 256 ** (len(data) - 1):
+                output -= 256 ** (len(data))
         return float(output) * multiplier + offset
 
     return reader

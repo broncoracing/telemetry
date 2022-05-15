@@ -33,6 +33,8 @@ data_formats = {
     'ECU1_ID': [
         Format(0, 2, name="Engine RPM", reader=scaled_reader(ms_first=True)),
         Format(2, 2, name="Lambda", reader=scaled_reader(multiplier=1.0/1000.0, ms_first=True)),
+        Format(4, 2, name="Lat Gs", reader=scaled_reader(multiplier=1.0/100.0, signed=True, ms_first=True)),
+        Format(6, 2, name="Long Gs", reader=scaled_reader(multiplier=1.0/100.0, signed=True, ms_first=True))
     ],
     'ECU2_ID': [
         Format(0, 1, name="Oil Temperature",        reader=scaled_reader(1.0)),
@@ -42,6 +44,7 @@ data_formats = {
     ],
     'ECU3_ID': [
         Format(0, 2, name="Oil Pressure",    reader=scaled_reader(1.0)),         # TODO Set scaling correctly
+        Format(2, 2, name="Air speed", reader=scaled_reader(1.0 / 100.0)),        # TODO this is borked
         Format(4, 2, name="Battery Voltage", reader=scaled_reader(1.0 / 1000.0)),
     ],
 
@@ -53,7 +56,7 @@ data_formats = {
     ],
 
     'BRAKE_PRESSURE_ID': [
-        Format(0, 2, name="BSE", reader=scaled_reader(ms_first=True)),
+        Format(0, 2, name="BSE", reader=scaled_reader(0.145, ms_first=True)),
     ],
 }
 
